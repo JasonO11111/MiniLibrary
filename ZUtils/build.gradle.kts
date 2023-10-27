@@ -1,7 +1,20 @@
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("maven-publish")
+}
+
+val GROUP_ID = "com.gcu"
+val ARTIFACT_ID = "mini-library"
+val VERSION = "1.0.0-${getDateTime()}-SNAPSHOT"
+
+fun getDateTime(): String {
+    val currentDateTime = LocalDateTime.now()
+    val formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
+    return currentDateTime.format(formatter)
 }
 
 android {
@@ -41,4 +54,20 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = GROUP_ID
+            artifactId = ARTIFACT_ID
+            version = VERSION
+
+            afterEvaluate {
+                // 在所有的配置都完成之后执行
+                // 从当前 module 的 release 包中发布
+                from(components["release"])
+            }
+        }
+    }
 }
